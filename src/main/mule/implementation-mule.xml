@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="e3995836-123d-4d72-8b9d-88a55330173b" file="properties\local-config.yaml" />
+	<sub-flow name="Contacts" doc:id="ed52a79e-bd90-44a0-b731-792d65704ae3" >
+		<ee:transform doc:name="Transform Message" doc:id="5efdd585-ae94-40d1-a591-c1e461349235" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map(item,Any)->[{'CustomerNumber' : item.CustomerNumber,
+'City' : item.City,
+'lastRuntime' : item.lastRuntime,
+'Street' : item.Street,
+'PostalCode' : item.PostalCode,
+'Name' : item.Name,
+'State' : item.State}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:upsert doc:name="Upsert" doc:id="cdaeb520-2d96-4b3b-a846-bacaf3fbb13b" objectType="Account" externalIdFieldName="Id__c" config-ref="Salesforce_Config1"/>
+		<ee:transform doc:name="Transform Message" doc:id="354f1c60-8967-45a9-8b7d-97bab76fa40a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>
