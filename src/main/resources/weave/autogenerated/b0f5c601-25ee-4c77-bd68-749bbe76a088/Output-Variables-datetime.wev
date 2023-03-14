@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_b0f5c601_25ee_4c77_bd68_749bbe76a088_Output_Variables_datetime = Any
+
