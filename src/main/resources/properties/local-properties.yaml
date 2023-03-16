@@ -1,0 +1,13 @@
+ requester:
+    mysql:
+      host: "localhost"
+      port: "8081"
+      path: "/api/contacts"
+    sfdc:
+      host: "localhost"
+      port: "8082"
+      path: "/api/accounts"
+    mysqlupdate:
+      host: "localhost"
+      port : "8081"
+      path: "/api/contacts/{name}"

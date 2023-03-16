@@ -6,21 +6,18 @@
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="989c1920-0995-40cc-b81a-b5aef02e69dc" >
-		<http:request-connection host="localhost" port="8081" />
-	</http:request-config>
 	<flow name="processing-etl-apiFlow" doc:id="bc367cc6-f99e-474c-b5f7-a22046dc5ca3" >
 		<scheduler doc:name="Scheduler" doc:id="373f7652-9d48-45a7-92bb-b49d08e4a0c5" >
 			<scheduling-strategy >
 				<fixed-frequency frequency="100" timeUnit="SECONDS"/>
 			</scheduling-strategy>
 		</scheduler>
-		<logger level="INFO" doc:name="Logger" doc:id="b23d2db5-51fe-4714-b3a2-081c79943078" message="**Process api starts***"/>
-		<os:retrieve doc:name="Retrieve" doc:id="6fd11a69-9931-413a-9bb2-b55dda63f585" key="lastRuntime">
+		<logger level="INFO" doc:name="Process-API-Starts" doc:id="b23d2db5-51fe-4714-b3a2-081c79943078" message="**Process api starts***"/>
+		<os:retrieve doc:name="LastRuntime" doc:id="6fd11a69-9931-413a-9bb2-b55dda63f585" key="lastRuntime">
 			<os:default-value ><![CDATA[2023-03-14 14:41:51
 ]]></os:default-value>
 		</os:retrieve>
-		<http:request method="GET" doc:name="Request" doc:id="bb4ad004-b792-4953-a125-90e9f17c732d" config-ref="HTTP_Request_configuration" path="/api/contacts">
+		<http:request method="GET" doc:name="Get-Contacts" doc:id="bb4ad004-b792-4953-a125-90e9f17c732d" config-ref="HTTP_Request_configuration3" path="${requester.mysql.path}">
 			<http:headers ><![CDATA[#[output application/java
 ---
 {
@@ -34,7 +31,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 }]]]></http:query-params>
 		</http:request>
 		<logger level="INFO" doc:name="Logger" doc:id="e3743f9a-f70d-4d48-9720-8822122da06d" message="#[payload]"/>
-		<ee:transform doc:name="Transform Message" doc:id="fa5837d4-cf63-4ce0-ab70-ba3624940c91" >
+		<ee:transform doc:name="Payload" doc:id="fa5837d4-cf63-4ce0-ab70-ba3624940c91" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -42,11 +39,58 @@ output application/json
 payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-variable value="#[payload map$[3]]" doc:name="Set Variable" doc:id="4245ff4b-e3b8-4b44-b041-0004eca8909c" variableName="datetime"/>
+		<set-variable value="#[[payload map$[3]]]" doc:name="LastRuntime-Data" doc:id="4245ff4b-e3b8-4b44-b041-0004eca8909c" variableName="datetime"/>
 		<logger level="INFO" doc:name="Logger" doc:id="8bfdb073-6b29-4cb6-9f5b-a2b84d3148a5" message="#[vars.datetime]"/>
-		<flow-ref doc:name="Flow Reference" doc:id="a5828bf0-d4f4-4793-9a38-512568325df3" name="sfdc-papi"/>
+		<flow-ref doc:name="SFDC" doc:id="a5828bf0-d4f4-4793-9a38-512568325df3" name="sfdc-papi"/>
+		<choice doc:name="Choice" doc:id="cd8c9ca8-1a44-486e-a227-00c8e8385f2f" >
+			<when expression="#[not isEmpty( vars.datetime[0])]">
+				<os:store doc:name="Store" doc:id="9d368c0a-80cf-4af7-b795-5d5c99290712" key="Db-date">
+					<os:value ><![CDATA[#[max(vars.datetime[0]) as String{format:"yyyy-MM-dd HH:mm:ss"}]]]></os:value>
+				</os:store>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="70074312-f395-46bf-8f7a-31ca31e70426" message='#["No new records to process after " ++ vars.datetime ++" datetime"]'/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Completed" doc:id="b2b2b5bc-9861-41c1-beaf-641668ee9e6e" message="**DB-Salesforce accounts sync is Completed**"/>
 	</flow>
 	<sub-flow name="sfdc-papi" doc:id="b0f5c601-25ee-4c77-bd68-749bbe76a088" >
-		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="7639c45f-0e1e-4efb-bdc7-ef92c416e21c" variableName="payloadDb"/>
+		<foreach doc:name="For Each" doc:id="a04cd02b-b2f6-42ef-995a-063b7537ed0e" >
+			<set-variable value="#[payload]" doc:name="Payload" doc:id="7639c45f-0e1e-4efb-bdc7-ef92c416e21c" variableName="payloadDb" />
+			<http:request method="PUT" doc:name="Upsert-in-sfdc" doc:id="8201d8de-a0f2-4a35-8c86-8f1c2ee8ffc7" config-ref="HTTP_Request_configuration4" path="${requester.sfdc.path}">
+				<http:headers><![CDATA[#[output application/java
+---
+{
+	client_secret : "e241f4aa3eca4b2a8FA67A2FEF5754F8",
+	client_id : "7b404180fbb84b099179a4126a9576ff"
+}]]]></http:headers>
+			</http:request>
+			<logger level="INFO" doc:name="Logger" doc:id="b75a6448-7f9f-4204-959f-b481bd11c2f7" message="#[payload]"/>
+			<ee:transform doc:name="Get-sf_id" doc:id="d117aef6-cb54-4dfd-9639-1795bfee27f2" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	sfff_id : payload.items[0].id,
+	name: vars.payloadDb.Name as String
+	}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<http:request method="PUT" doc:name="Database-update" doc:id="035a7888-5705-4ff1-bf8c-a48d87fa8edf" config-ref="HTTP_Request_configuration" path="${requester.mysqlupdate.path}">
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"client_secret" : "e241f4aa3eca4b2a8FA67A2FEF5754F8",
+	client_id : "7b404180fbb84b099179a4126a9576ff"
+}]]]></http:headers>
+				<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"name" : "payload.name"
+}]]]></http:uri-params>
+			</http:request>
+			<logger level="INFO" doc:name="Logger" doc:id="37a4131a-d3a6-47a3-ba48-c856acce0886" message="#[payload]"/>
+		</foreach>
 	</sub-flow>
 </mule>

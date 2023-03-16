@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="24cf18c3-0913-4cac-ad02-1dd159f718ca" file="properties\local-properties.yaml" />
+	<http:request-config name="HTTP_Request_configuration3" doc:name="HTTP Request configuration" doc:id="729ae171-512d-46af-bdc9-5967ea8226df" >
+		<http:request-connection host="${requester.mysql.host}" port="${requester.mysql.port}" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration4" doc:name="HTTP Request configuration" doc:id="3cd0bb7a-796d-4ad4-b86b-3985664384d9" >
+		<http:request-connection host="${requester.sfdc.host}" port="${requester.sfdc.port}" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="e9e18102-b339-4315-adf7-ae8935220c79" >
+		<http:request-connection host="${requester.mysqlupdate.host}" port="${requester.mysqlupdate.port}" />
+	</http:request-config>
+</mule>
