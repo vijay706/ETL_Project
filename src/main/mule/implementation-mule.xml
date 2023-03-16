@@ -6,26 +6,30 @@
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<configuration-properties doc:name="Configuration properties" doc:id="e3995836-123d-4d72-8b9d-88a55330173b" file="properties\local-config.yaml" />
-	<sub-flow name="Contacts" doc:id="ed52a79e-bd90-44a0-b731-792d65704ae3" >
-		<ee:transform doc:name="Transform Message" doc:id="5efdd585-ae94-40d1-a591-c1e461349235" >
+	<sub-flow name="implementation-muleSub_Flow" doc:id="b27a615d-86c1-4f3b-9389-c3819b786aad" >
+		<logger level="INFO" doc:name="Logger" doc:id="abdbdf2b-7cef-4731-bb03-f13bf4047244" />
+		<ee:transform doc:name="Transform Message" doc:id="0350619b-180b-430f-9615-65c1d19b086c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
-payload map(item,Any)->[{'CustomerNumber' : item.CustomerNumber,
-'City' : item.City,
-'lastRuntime' : item.lastRuntime,
-'Street' : item.Street,
-'PostalCode' : item.PostalCode,
-'Name' : item.Name,
-'State' : item.State}]]]></ee:set-payload>
+
+[{
+CustomerNumber__c : payload.CustomerNumber,
+City__c : payload.City,
+lastRuntime__c: payload.lastRuntime,
+Street__c: payload.Street,
+PostalCode__c: payload.PostalCode,
+Name__c : payload.Name,
+State__c: payload.State,(Id__c: payload.sf_id) if (payload.sf_id != null)
+}]]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<salesforce:upsert doc:name="Upsert" doc:id="cdaeb520-2d96-4b3b-a846-bacaf3fbb13b" objectType="Account" externalIdFieldName="Id__c" config-ref="Salesforce_Config1"/>
-		<ee:transform doc:name="Transform Message" doc:id="354f1c60-8967-45a9-8b7d-97bab76fa40a" >
+		<salesforce:upsert doc:name="Upsert" doc:id="b6465f32-c741-421d-b18b-45eaad998d0f" config-ref="Salesforce_Config1" objectType="Db_Record__c" externalIdFieldName="Id"/>
+		<ee:transform doc:name="Transform Message" doc:id="46ec623a-dd06-4119-b36f-f8a7fac4ebdc" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
+output application/json
 ---
 payload]]></ee:set-payload>
 			</ee:message>
