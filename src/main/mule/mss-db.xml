@@ -3,7 +3,7 @@
     <http:listener-config name="mss-db-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
-    <apikit:config name="mss-db-config" api="resource::f01af3b0-df53-4ce8-84da-d739cfc49837:mss-db:3.0.0:raml:zip:mss-db.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <apikit:config name="mss-db-config" api="resource::f01af3b0-df53-4ce8-84da-d739cfc49837:mss-db:4.0.0:raml:zip:mss-db.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="mss-db-main">
         <http:listener config-ref="mss-db-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
@@ -123,13 +123,9 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="put:\(name):mss-db-config">
-        <ee:transform>
-            <ee:variables>
-                <ee:set-variable variableName="name">attributes.uriParams.'name'</ee:set-variable>
-            </ee:variables>
-        </ee:transform>
-        <ee:transform>
+    <flow name="put:\contacts\(name):mss-db-config">
+        <flow-ref doc:name="Flow Reference" doc:id="6b096e15-a8b6-429e-95f2-061c5fdf7ba5" name="update"/>
+		<ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -140,8 +136,8 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-    <flow name="get:\contacts:mss-db-config">
-        <flow-ref doc:name="Flow Reference" doc:id="e30fe5e7-70ae-4e6b-a7e1-97dc51c176f5" name="mule-implementationSub_Flow"/>
+    <flow name="get:\contacts:mss-db-config" doc:id="34a35c1e-10a0-4c2f-b997-33344f6664ed">
+        <flow-ref doc:name="Flow Reference" doc:id="a40ee1b3-6afb-4506-a600-b04e51d970c4" name="get-contacts"/>
 		<ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0

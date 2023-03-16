@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_724ec3ff_4a55_496b_8284_c419bc07cb48_Output_Payload = Array<{|  Name?: String,   Street?: String,   City?: String,   State?: String,   PostalCode?: Number,   CustomerNumber?: Number,   sf_id?: String,   lastRuntime?: Date|}>
-

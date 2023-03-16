@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<sub-flow name="get-contacts" doc:id="c785d705-6f5e-42b7-abe4-872440eb8403" >
+		<logger level="INFO" doc:name="Logger" doc:id="df0ad75c-94a2-4715-9a89-13d03cae8320" message="**get-contacts**"/>
+		<db:select doc:name="Select" doc:id="5e9da85b-d985-40c1-a7ba-5a4e411d4932" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from mss_contacts where lastRuntime > :lastRuntime;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{lastRuntime : attributes.queryParams.lastRuntime}]]]></db:input-parameters>
+		</db:select>
+	</sub-flow>
+	<sub-flow name="update" doc:id="9b9bcac3-b452-4073-880f-032dfd986f10" >
+		<db:update doc:name="Update" doc:id="69890d05-d2dc-4d73-9ead-91408e1f9615" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE mss_contacts SET sf_id = :sf_id where Name = :Name ;]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{"sf_id": payload.sfffid, "Name" : payload.Name  }]]]></db:input-parameters>
+		</db:update>
+	</sub-flow>
+</mule>
